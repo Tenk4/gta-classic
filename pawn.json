@@ -64,7 +64,6 @@
 				"-Z"
 			],
 			"includes": [
-				"legacy",
 				"gamemodes/utils",
 				"gamemodes/core",
 				"gamemodes/core/account"
