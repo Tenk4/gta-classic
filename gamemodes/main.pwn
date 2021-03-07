@@ -4,6 +4,10 @@
 #define YSI_NO_MODE_CACHE
 #define YSI_NO_VERSION_CHECK
 
+/*
+	Inspiration by https://github.com/PatrickGTR/gta-open
+*/
+
 #include <a_samp>
 
 #include <constants>
