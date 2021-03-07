@@ -1,1 +1,1 @@
-ต้นแบบการเขียนมาจากที่นี่ https://github.com/PatrickGTR/gta-open
+Inspiration by https://github.com/PatrickGTR/gta-open
