@@ -1,6 +1,5 @@
 forward OnPlayerLogin(playerid);
 
-//#include <account_data>
 #include <account_ban>
 #include <account_create>
 #include <account_login>
