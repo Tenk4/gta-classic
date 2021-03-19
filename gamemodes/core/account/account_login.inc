@@ -11,6 +11,31 @@ hook OnPlayerConnect(playerid) {
 }
 
 Account_PromptLogin(playerid) {
+    new
+        query[81],
+        playerHash[62],
+        playerDate[11],
+        playerTime[9],
+        playerIP[16];
+
+	mysql_format(MySQL_GetHandle(), query, sizeof query, 
+    "\
+        SELECT * FROM `players` WHERE `username` = '%e' LIMIT 1\
+    ", 
+        Player_GetName(playerid)
+    );
+    mysql_query(MySQL_GetHandle(), query);
+
+    cache_get_value_name(0, "password", playerHash, sizeof(playerHash));
+    cache_get_value_name(0, "date_reg", playerDate, sizeof(playerDate));
+    cache_get_value_name(0, "time_reg", playerTime, sizeof(playerTime));
+    cache_get_value_name(0, "ip", playerIP, sizeof(playerIP));
+
+    Player_SetAccountHash(playerid, playerHash);
+    Player_SetAccountDate(playerid, playerDate);
+    Player_SetAccountTime(playerid, playerTime);
+    Player_SetAccountIP(playerid, playerIP);
+
     static 
         const caption[] = 
         "\
@@ -30,20 +55,7 @@ Account_PromptLogin(playerid) {
 forward Account_Login(playerid, dialogid, response, listitem, string:inputtext[]);
 public Account_Login(playerid, dialogid, response, listitem, string:inputtext[]) {
     if (response) {
-        new
-            query[250],
-            buffer[129];
-
-        WP_Hash(buffer, sizeof(buffer), inputtext);
-
-        mysql_format(MySQL_GetHandle(), query, sizeof(query), 
-        "\
-            SELECT * FROM `players` WHERE `username` = '%e' AND `password` = '%s' LIMIT 1\
-        ", 
-            Player_GetName(playerid), 
-            buffer
-        );
-        mysql_tquery(MySQL_GetHandle(), query, "Account_LoginAttemps", "d", playerid);
+        bcrypt_verify(playerid, "OnPasswordVerify", inputtext, Player_GetAccountHash(playerid));
     }
     else {
         Kick(playerid);
@@ -51,15 +63,9 @@ public Account_Login(playerid, dialogid, response, listitem, string:inputtext[])
     return 1;
 }
 
-forward Account_LoginAttemps(playerid);
-public Account_LoginAttemps(playerid) {
-
-    new 
-        rows;
-
-    cache_get_row_count(rows);
-
-    if (rows)
+forward OnPasswordVerify(playerid, bool:success);
+public OnPasswordVerify(playerid, bool:success) {
+    if (success)
     {
         PasswordAttempts[playerid] = 0;
         CallLocalFunction("OnPlayerLogin", "d", playerid);
@@ -80,23 +86,9 @@ public Account_LoginAttemps(playerid) {
             Account_PromptLogin(playerid);
         }
     }
-    return 1;
 }
 
 hook OnPlayerLogin(playerid) {
-    new 
-        date[11],
-        time[9],
-        ip[16];
-
-    cache_get_value_name(0, "date_reg", date, 11);
-    cache_get_value_name(0, "time_reg", time, 9);
-    cache_get_value_name(0, "ip", ip, 16);
-
-    Player_SetAccountDate(playerid, date);
-    Player_SetAccountTime(playerid, time);
-    Player_SetAccountIP(playerid, ip);
-
     ClearPlayerChat(playerid, 20);
     SendClientMessage(playerid, COLOR_YELLOW, "ยินดีต้อนรับเข้าสู่ "SERVER_NAME" เวอร์ชั่น: "SERVER_VERSION"");
 

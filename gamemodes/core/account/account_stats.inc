@@ -95,3 +95,65 @@ stock Player_GiveAdmin(playerid, level, bool:save = false) {
 stock Player_GetAdmin(playerid) {
     return PlayerAdmin[playerid];
 }
+
+stock Player_GiveKill(playerid, kills, bool:save = false) {
+    new
+        currentKills = Player_GetKills(playerid),
+        newKills = currentKills + kills;
+
+    PlayerKills[playerid] = newKills;
+
+    if(save) {
+        new 
+            query[64];
+
+        mysql_format(MySQL_GetHandle(), query, sizeof query, 
+        "\
+            UPDATE \
+                player_stats \
+            SET \
+                kills = %d \
+            WHERE \
+                u_id = %d \
+        ",
+            newLevel,
+            Player_GetAccountID(playerid)
+        );
+        mysql_tquery(MySQL_GetHandle(), query);
+    }
+}
+
+stock Player_GetKills(playerid) {
+    return PlayerKills[playerid];
+}
+
+stock Player_GiveDeath(playerid, kills, bool:save = false) {
+    new
+        currentDeaths = Player_GetDeaths(playerid),
+        newDeaths = currentDeaths + deaths;
+
+    PlayerDeaths[playerid] = newDeaths;
+    
+    if(save) {
+        new 
+            query[64];
+
+        mysql_format(MySQL_GetHandle(), query, sizeof query, 
+        "\
+            UPDATE \
+                player_stats \
+            SET \
+                deaths = %d \
+            WHERE \
+                u_id = %d \
+        ",
+            newLevel,
+            Player_GetAccountID(playerid)
+        );
+        mysql_tquery(MySQL_GetHandle(), query);
+    }
+}
+
+stock Player_GetDeaths(playerid) {
+    return PlayerDeaths[playerid];
+}

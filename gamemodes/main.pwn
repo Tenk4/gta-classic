@@ -4,6 +4,7 @@
 #define YSI_NO_MODE_CACHE
 #define YSI_NO_VERSION_CHECK
 
+
 /*
 	Inspiration by https://github.com/PatrickGTR/gta-open
 */
@@ -14,12 +15,10 @@
 
 // Libraries
 #include <a_mysql>
+#include <samp_bcrypt>
 #include <zcmd>
 #include <Pawn.RakNet>
 #include <cec>
-
-
-native WP_Hash(buffer[], len, const str[]);
 
 // YSI
 #include <YSI_Coding\y_timers>

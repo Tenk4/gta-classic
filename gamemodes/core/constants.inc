@@ -7,3 +7,4 @@
 #define SERVER_VERSION          "0.01"
 
 #define MAX_BAN_REASON          32
+#define BCRYPT_COST             12

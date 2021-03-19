@@ -51,6 +51,6 @@ hook OnGameModeExit()
 	return 1;
 }
 
-stock MySQL:MySQL_GetHandle() {
+MySQL:MySQL_GetHandle() {
     return MySQL_ConHandle;
 }
