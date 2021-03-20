@@ -10,12 +10,8 @@
 		"samp-incognito/samp-streamer-plugin:v2.9.4",
 		"Southclaws/zcmd",
 		"Y-Less/sscanf",
-<<<<<<< HEAD
 		"aktah/cec",
 		"Sreyas-Sreelal/samp-bcrypt:0.2.3"
-=======
-		"aktah/cec:v2.3"
->>>>>>> ac5b57097aa7e9155746e0ff3c845b306a0f94e3
 	],
 	"local": true,
 	"runtime": {
