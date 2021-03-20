@@ -9,3 +9,14 @@ Player_GetIP(playerid) {
     GetPlayerIp(playerid, IP, sizeof IP);
     return IP;
 }
+
+Player_Kick(playerid, time = 500) {
+    SetTimerEx("Player_Kicked", time, false, "d", playerid);
+    return 1;
+}
+
+forward Player_Kicked(playerid);
+public Player_Kicked(playerid) {
+    Kick(playerid);
+    return 1;
+}

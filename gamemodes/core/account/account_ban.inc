@@ -2,6 +2,10 @@
 
 forward OnPlayerPrepareToConnect(playerid);
 
+hook OnPlayerConnect(playerid) {
+    return 1;
+}
+
 hook OnPlayerRequestClass(playerid, classid) {
     if (!Player_IsLoggedIn(playerid)) {
         TogglePlayerSpectating(playerid, true);
@@ -71,7 +75,7 @@ public OnPlayerBanned(playerid) {
         );
         Dialog_Show(playerid, DIALOG_STYLE_MSGBOX, "ข้อมูลการโดนแบน", string, "ปิด", "");
 
-        Kick_Message(playerid);
+        Player_Kick(playerid);
     }
     else {
         CallLocalFunction("OnPlayerPrepareToConnect", "d", playerid);

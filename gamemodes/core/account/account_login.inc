@@ -12,11 +12,7 @@ hook OnPlayerConnect(playerid) {
 
 Account_PromptLogin(playerid) {
     new
-        query[81],
-        playerHash[62],
-        playerDate[11],
-        playerTime[9],
-        playerIP[16];
+        query[81];
 
 	mysql_format(MySQL_GetHandle(), query, sizeof query, 
     "\
@@ -24,7 +20,25 @@ Account_PromptLogin(playerid) {
     ", 
         Player_GetName(playerid)
     );
-    mysql_query(MySQL_GetHandle(), query);
+    mysql_tquery(MySQL_GetHandle(), query, "Account_PromptLoginEx", "d", playerid);
+    return 1;
+}
+
+forward Account_PromptLoginEx(playerid);
+public Account_PromptLoginEx(playerid) {
+    new
+        playerHash[62],
+        playerDate[11],
+        playerTime[9],
+        playerIP[16],
+        rows;
+
+    cache_get_row_count(rows);
+
+    if (!rows) {
+        Player_Kick(playerid);
+        return 0;
+    }
 
     cache_get_value_name(0, "password", playerHash, sizeof(playerHash));
     cache_get_value_name(0, "date_reg", playerDate, sizeof(playerDate));
@@ -42,13 +56,15 @@ Account_PromptLogin(playerid) {
             ยินดีต้อนรับเข้าสู่ "SERVER_NAME"\
             กรุณาใส่รหัสผ่านเพื่อล็อคอิน\
         ";
+
     Dialog_ShowCallback(playerid,
         using public Account_Login<iiiis>, 
         DIALOG_STYLE_PASSWORD, 
         SERVER_NAME, 
         caption, 
         "ล็อคอิน",
-        "ออกจากเกม");
+        "ออกจากเกม"
+    );
     return 1;
 }
 
@@ -69,6 +85,7 @@ public OnPasswordVerify(playerid, bool:success) {
     {
         PasswordAttempts[playerid] = 0;
         CallLocalFunction("OnPlayerLogin", "d", playerid);
+        Player_ResetAccountHash(playerid);
     }
     else
     {
@@ -77,7 +94,7 @@ public OnPasswordVerify(playerid, bool:success) {
         {
             SendClientMessage(playerid, COLOR_RED, "รหัสผ่านไม่ถูกต้องครบ 3/3 ระบบจึงเตะคุณออกจากเซิร์ฟเวอร์");
             SendClientMessage(playerid, COLOR_RED, "ช่วยเหลือ: /q ในการออกจากหน้าต่างเกม");
-            Kick_Message(playerid);
+            Player_Kick(playerid);
         }
         else
         {

@@ -63,3 +63,7 @@ Player_GetAccountHash(playerid) {
 Player_SetAccountHash(playerid, const hash[]) {
     return format(PlayerHash[playerid], 62, hash);
 }
+
+Player_ResetAccountHash(playerid) {
+    return PlayerHash[playerid][0] = EOS;
+}

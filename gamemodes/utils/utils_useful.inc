@@ -24,17 +24,6 @@ Time_Get() {
     return time;
 }
 
-Kick_Message(playerid, time = 500) {
-    SetTimerEx("Kick_MessageFinish", time, false, "d", playerid);
-    return 1;
-}
-
-forward Kick_MessageFinish(playerid);
-public Kick_MessageFinish(playerid) {
-    Kick(playerid);
-    return 1;
-}
-
 ClearPlayerChat(playerid, lines) {
     for(new i = 0; i <= lines; i++)
     {
