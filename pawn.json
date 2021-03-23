@@ -59,6 +59,7 @@
 			"includes": [
 				"gamemodes/utils",
 				"gamemodes/core",
+				"gamemodes/core/anti-cheat",
 				"gamemodes/core/account",
 				"gamemodes/core/player"
 			],

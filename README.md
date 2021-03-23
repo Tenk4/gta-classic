@@ -1,1 +1,1 @@
-Inspiration by https://github.com/PatrickGTR/gta-open
+Inspired by https://github.com/PatrickGTR/gta-open without mysql-prepare & inline

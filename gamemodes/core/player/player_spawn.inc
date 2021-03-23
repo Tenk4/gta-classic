@@ -1,9 +1,15 @@
 #include <YSI_Coding\y_hooks>
 
+forward OnPlayerFirstSpawn(playerid);
+
 static
-    const Float:SpawnPoints[][] = {
-    {810.63520, -1340.0682, 13.5386, 37.33070}
-};
+    bool:PlayerFirstSpawn[MAX_PLAYERS] = true
+;
+
+hook OnPlayerConnect(playerid) {
+    PlayerFirstSpawn[playerid] = true;
+    return 1;
+}
 
 hook OnPlayerLogin(playerid)
 {
@@ -11,17 +17,19 @@ hook OnPlayerLogin(playerid)
     return 1;
 }
 
-timer ForceSpawnPlayer[50](playerid) {
-	// using SetSpawnInfo fixes the kick bug when
-	// TogglePlayerSpectating is used to force spawn player but without using
-	// SetSpawnInfo the server does not know where to spawn the player.
+timer void:ForceSpawnPlayer[50](playerid) {
 	SetSpawnInfo(playerid, 0, 264, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 0, 0);
 	TogglePlayerSpectating(playerid, false);
 }
 
 hook OnPlayerSpawn(playerid) {
-    SetPlayerPos(playerid, SpawnPoints[0][0], SpawnPoints[0][1], SpawnPoints[0][2]);
-    SetPlayerFacingAngle(playerid, SpawnPoints[0][3]);
+    if(PlayerFirstSpawn[playerid]) {
+        CallLocalFunction("OnPlayerFirstSpawn", "i", playerid);
+        PlayerFirstSpawn[playerid] = false;
+    }
+    SetPlayerPos(playerid, 810.63520, -1340.0682, 13.5386);
+    SetPlayerFacingAngle(playerid, 37.33070);
+    SetCameraBehindPlayer(playerid);
     printf(
     "\
         UID: %d | DATE: %s | TIME: %s | IP: %s\
@@ -31,5 +39,42 @@ hook OnPlayerSpawn(playerid) {
         Player_GetAccountTime(playerid), 
         Player_GetAccountIP(playerid)
     );
+    return 1;
+}
+
+Player_HitpointLoad(playerid) {
+    inline _LoadHitpoint() {
+        new
+            Float:armour,
+            Float:health,
+            rows
+        ;
+
+        cache_get_row_count(rows);
+
+        if(rows) {
+            cache_get_value_name_float(0, "armour", armour);
+            cache_get_value_name_float(0, "health", health);
+
+            SetPlayerArmour(playerid, armour);
+            SetPlayerHealth(playerid, health);
+        }
+    }
+
+    static const query[] = "\
+        SELECT \
+            armour, \
+            health \
+        FROM \
+            player_stats \
+        WHERE \
+            u_id = %d \
+    ";
+
+    MySQL_TQueryInline(MySQL_GetHandle(), using inline _LoadHitpoint, query, Player_GetAccountID(playerid));
+}
+
+public OnPlayerFirstSpawn(playerid) {
+    Player_HitpointLoad(playerid);
     return 1;
 }

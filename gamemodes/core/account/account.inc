@@ -12,15 +12,38 @@ static
     PlayerUID[MAX_PLAYERS],
     PlayerDate[MAX_PLAYERS][11],
     PlayerTime[MAX_PLAYERS][9],
-    PlayerIP[MAX_PLAYERS][16],
-    PlayerHash[MAX_PLAYERS][62];
+    PlayerIP[MAX_PLAYERS][16];
 
 hook OnPlayerConnect(playerid) {
     PlayerUID[playerid]         = 0;
     PlayerDate[playerid][0]     = EOS;
     PlayerTime[playerid][0]     = EOS;
     PlayerIP[playerid][0]       = EOS;
-    PlayerHash[playerid][0]     = EOS;
+    return 1;
+}
+
+public OnPlayerMoneyChange(playerid, previous, current) {
+    va_SendClientMessage(playerid, -1, "money change %d", current);
+    
+    new
+        string[80]
+    ;
+
+    static const query[] = "\
+        UPDATE \
+            player_stats \
+        SET \
+            money = %d \
+        WHERE \
+            u_id = %d \
+    ";
+
+    mysql_format(MySQL_GetHandle(), string, sizeof string, 
+        query,
+        current,
+        Player_GetAccountID(playerid)
+    );
+    mysql_tquery(MySQL_GetHandle(), string);
     return 1;
 }
 
@@ -54,16 +77,4 @@ Player_GetAccountIP(playerid) {
 
 Player_SetAccountIP(playerid, const ip[]) {
     return format(PlayerIP[playerid], 16, ip);
-}
-
-Player_GetAccountHash(playerid) {
-    return PlayerHash[playerid];
-}
-
-Player_SetAccountHash(playerid, const hash[]) {
-    return format(PlayerHash[playerid], 62, hash);
-}
-
-Player_ResetAccountHash(playerid) {
-    return PlayerHash[playerid][0] = EOS;
 }

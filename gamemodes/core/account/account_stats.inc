@@ -2,45 +2,61 @@
 
 static
     PlayerAdmin[MAX_PLAYERS],
-    Float:PlayerArmour[MAX_PLAYERS],
-    Float:PlayerHealth[MAX_PLAYERS],
     PlayerKills[MAX_PLAYERS],
     PlayerDeaths[MAX_PLAYERS],
     PlayerWantedLevel[MAX_PLAYERS],
-    PlayerMoney[MAX_PLAYERS],
     PlayerSkin[MAX_PLAYERS];
 
 Account_LoadStats(playerid) {
-    new
-        query[64];
+    inline _LoadStats() {
+        new
+            adminlevel,
+            kills,
+            deaths,
+            wantedlevel,
+            money,
+            skin,
+            rows
+        ;
 
-    format(query, sizeof query, 
-    "\
-        SELECT * FROM `player_stats` WHERE `u_id` = '%e' LIMIT 1\
-    ",
-        Player_GetAccountID(playerid)
-    );
-    mysql_tquery(MySQL_GetHandle(), query, "Player_StatsLoaded", "d", playerid);
+        cache_get_row_count(rows);
+
+        if(rows) {
+            cache_get_value_name_int(0, "admin_level", adminlevel);
+            cache_get_value_name_int(0, "kills", kills);
+            cache_get_value_name_int(0, "deaths", deaths);
+            cache_get_value_name_int(0, "wanted_level", wantedlevel);
+            cache_get_value_name_int(0, "money", money);
+            cache_get_value_name_int(0, "skin", skin);
+
+            Player_GiveAdmin(playerid, adminlevel);
+
+            Player_GiveKill(playerid, kills);
+            Player_GiveDeath(playerid, deaths);
+
+            defer DelayGiveMoney(playerid, money);
+        }
+    }
+
+    static const query[] = "\
+        SELECT \
+            admin_level, \
+            kills, \
+            deaths, \
+            wanted_level, \
+            money, \
+            skin \
+        FROM \
+            player_stats \
+        WHERE \
+            u_id = %d \
+    ";
+
+    MySQL_TQueryInline(MySQL_GetHandle(), using inline _LoadStats, query, Player_GetAccountID(playerid));
 }
 
-forward Player_StatsLoaded(playerid);
-public Player_StatsLoaded(playerid) {
-    new
-        rows;
-    
-    cache_get_row_count(rows);
-
-    if(rows) {
-        cache_get_value_name_int(0, "admin_level", PlayerAdmin[playerid]);
-        cache_get_value_name_float(0, "armour", PlayerArmour[playerid]);
-        cache_get_value_name_float(0, "health", PlayerHealth[playerid]);
-        cache_get_value_name_int(0, "kills", PlayerKills[playerid]); 
-        cache_get_value_name_int(0, "deaths", PlayerDeaths[playerid]);
-        cache_get_value_name_int(0, "wanted_level", PlayerWantedLevel[playerid]);    
-        cache_get_value_name_int(0, "money", PlayerMoney[playerid]); 
-        cache_get_value_name_int(0, "skin", PlayerSkin[playerid]);   
-    }
-    return 1;
+timer DelayGiveMoney[100](playerid, money){
+    GivePlayerMoney(playerid, money);
 }
 
 hook OnPlayerLogin(playerid) {
@@ -50,45 +66,49 @@ hook OnPlayerLogin(playerid) {
 
 hook OnPlayerRegister(playerid) {
     new
-        query[60];
+        string[64]
+    ;
 
-    format(query, sizeof query, 
-    "\
+    static const query[] = "\
         INSERT INTO `player_stats` \
             (`u_id`) \
         VALUES \
-            ('%d')\
-    ", 
+            ('%d') \
+    ";
+
+    format(string, sizeof string, 
+        query,
         Player_GetAccountID(playerid)
     );
-    mysql_tquery(MySQL_GetHandle(), query);
+    mysql_tquery(MySQL_GetHandle(), string);
     return 1;
 }
 
 stock Player_GiveAdmin(playerid, level, bool:save = false) {
     new
         currentLevel = Player_GetAdmin(playerid),
-        newLevel = currentLevel + level;
+        newLevel = currentLevel + level,
+        string[70]
+    ;
         
     PlayerAdmin[playerid] = newLevel;
     
     if(save) {
-        new 
-            query[64];
-
-        mysql_format(MySQL_GetHandle(), query, sizeof query, 
-        "\
+        static const query[] = "\
             UPDATE \
                 player_stats \
             SET \
                 admin_level = %d \
             WHERE \
                 u_id = %d \
-        ",
+        ";
+
+        mysql_format(MySQL_GetHandle(), string, sizeof string, 
+            query,
             newLevel,
             Player_GetAccountID(playerid)
         );
-        mysql_tquery(MySQL_GetHandle(), query);
+        mysql_tquery(MySQL_GetHandle(), string);
     }
 }
 
@@ -99,27 +119,28 @@ stock Player_GetAdmin(playerid) {
 stock Player_GiveKill(playerid, kills, bool:save = false) {
     new
         currentKills = Player_GetKills(playerid),
-        newKills = currentKills + kills;
+        newKills = currentKills + kills,
+        string[71]
+    ;
 
     PlayerKills[playerid] = newKills;
 
     if(save) {
-        new 
-            query[64];
-
-        mysql_format(MySQL_GetHandle(), query, sizeof query, 
-        "\
+        static const query[] = "\
             UPDATE \
                 player_stats \
             SET \
                 kills = %d \
             WHERE \
                 u_id = %d \
-        ",
-            newLevel,
+        ";
+
+        mysql_format(MySQL_GetHandle(), string, sizeof string, 
+            query,
+            newKills,
             Player_GetAccountID(playerid)
         );
-        mysql_tquery(MySQL_GetHandle(), query);
+        mysql_tquery(MySQL_GetHandle(), string);
     }
 }
 
@@ -127,33 +148,86 @@ stock Player_GetKills(playerid) {
     return PlayerKills[playerid];
 }
 
-stock Player_GiveDeath(playerid, kills, bool:save = false) {
+stock Player_GiveDeath(playerid, deaths, bool:save = false) {
     new
         currentDeaths = Player_GetDeaths(playerid),
-        newDeaths = currentDeaths + deaths;
+        newDeaths = currentDeaths + deaths,
+        string[71]
+    ;
 
     PlayerDeaths[playerid] = newDeaths;
     
     if(save) {
-        new 
-            query[64];
-
-        mysql_format(MySQL_GetHandle(), query, sizeof query, 
-        "\
+        static const query[] = "\
             UPDATE \
                 player_stats \
             SET \
                 deaths = %d \
             WHERE \
                 u_id = %d \
-        ",
-            newLevel,
+        ";
+
+        mysql_format(MySQL_GetHandle(), string, sizeof string, 
+            query,
+            newDeaths,
             Player_GetAccountID(playerid)
         );
-        mysql_tquery(MySQL_GetHandle(), query);
+        mysql_tquery(MySQL_GetHandle(), string);
     }
 }
 
 stock Player_GetDeaths(playerid) {
     return PlayerDeaths[playerid];
+}
+
+hook function SetPlayerHealth(playerid, Float:health) {
+    va_SendClientMessage(playerid, -1, "hp change %.0f", health);
+    
+    new
+        string[80]
+    ;
+
+    static const query[] = "\
+        UPDATE \
+            player_stats \
+        SET \
+            health = %.0f \
+        WHERE \
+            u_id = %d \
+    ";
+
+    mysql_format(MySQL_GetHandle(), string, sizeof string, 
+        query,
+        health,
+        Player_GetAccountID(playerid)
+    );
+    mysql_tquery(MySQL_GetHandle(), string);
+
+    return continue(playerid, health);
+}
+
+hook function SetPlayerArmour(playerid, Float:armour) {
+    va_SendClientMessage(playerid, -1, "armour change %.0f", armour);
+    
+    new
+        string[80]
+    ;
+
+    static const query[] = "\
+        UPDATE \
+            player_stats \
+        SET \
+            armour = %.0f \
+        WHERE \
+            u_id = %d \
+    ";
+
+    mysql_format(MySQL_GetHandle(), string, sizeof string, 
+        query,
+        armour,
+        Player_GetAccountID(playerid)
+    );
+    mysql_tquery(MySQL_GetHandle(), string);
+
+    return continue(playerid, armour);
 }

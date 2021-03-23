@@ -16,7 +16,8 @@ Time_Get() {
         time[9], 
         hour, 
         minute, 
-        second;
+        second
+    ;
 
     gettime(hour, minute, second);
     format(time, sizeof(time), "%02d:%02d:%02d", hour, minute, second);

@@ -2,14 +2,10 @@
 
 forward OnPlayerPrepareToConnect(playerid);
 
-hook OnPlayerConnect(playerid) {
-    return 1;
-}
-
 hook OnPlayerRequestClass(playerid, classid) {
     if (!Player_IsLoggedIn(playerid)) {
         TogglePlayerSpectating(playerid, true);
-        defer Ban_PrepareCheck(playerid);
+        defer Camera_ConnectPos(playerid);
     }
     else {
         Kick(playerid);
@@ -17,12 +13,13 @@ hook OnPlayerRequestClass(playerid, classid) {
     return 1;
 }
 
-timer Ban_PrepareCheck[500](playerid) {
+timer Camera_ConnectPos[500](playerid) {
 	SetPlayerCameraPos(playerid, -1762.7764, 886.1344, 305.2547);
 	SetPlayerCameraLookAt(playerid, -1762.0156, 885.4888, 304.5006);
 
 	new 
-        query[81];
+        query[81]
+    ;
 
 	mysql_format(MySQL_GetHandle(), query, sizeof query, 
     "\
@@ -43,7 +40,8 @@ public OnPlayerBanned(playerid) {
         banReason[MAX_BAN_REASON],
         banDate[11],
         banTime[9],
-        string[400];
+        string[400]
+    ;
 
     cache_get_row_count(rows);
 
@@ -84,36 +82,35 @@ public OnPlayerBanned(playerid) {
 }
 
 public OnPlayerPrepareToConnect(playerid) {
-    new 
-        query[81];
+    inline _PrepareToConnect() {
+        new 
+            rows,
+            playerUID
+        ;
 
-	mysql_format(MySQL_GetHandle(), query, sizeof query, 
-    "\
-        SELECT * FROM `players` WHERE `username` = '%e' LIMIT 1\
-    ", 
-        Player_GetName(playerid)
-    );
-	mysql_tquery(MySQL_GetHandle(), query, "OnPlayerConnected", "d", playerid);
-    return 1;
-}
+        cache_get_row_count(rows);
+        
+        if (rows) {
+            cache_get_value_name_int(0, "u_id", playerUID);
 
-forward OnPlayerConnected(playerid);
-public OnPlayerConnected(playerid) {
-    new 
-        rows,
-        playerUID;
+            Player_SetAccountID(playerid, playerUID);
 
-    cache_get_row_count(rows);
-    
-    if (rows) {
-        cache_get_value_name_int(0, "u_id", playerUID);
-
-        Player_SetAccountID(playerid, playerUID);
-
-        Account_PromptLogin(playerid);
-    } 
-    else {
-        Account_PromptRegister(playerid);
+            Account_PromptLogin(playerid);
+        } 
+        else {
+            Account_PromptRegister(playerid);
+        }
     }
+
+    static const query[] = "\
+        SELECT \
+            u_id \
+        FROM \
+            players \
+        WHERE \
+            username = '%e'"
+    ;
+
+    MySQL_TQueryInline(MySQL_GetHandle(), using inline _PrepareToConnect, query, Player_GetName(playerid));
     return 1;
 }

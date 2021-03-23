@@ -12,70 +12,70 @@ hook OnPlayerConnect(playerid) {
 
 Account_PromptLogin(playerid) {
     new
-        query[81];
-
-	mysql_format(MySQL_GetHandle(), query, sizeof query, 
-    "\
-        SELECT * FROM `players` WHERE `username` = '%e' LIMIT 1\
-    ", 
-        Player_GetName(playerid)
-    );
-    mysql_tquery(MySQL_GetHandle(), query, "Account_PromptLoginEx", "d", playerid);
-    return 1;
-}
-
-forward Account_PromptLoginEx(playerid);
-public Account_PromptLoginEx(playerid) {
-    new
         playerHash[62],
         playerDate[11],
         playerTime[9],
         playerIP[16],
-        rows;
+        rows
+    ;
 
-    cache_get_row_count(rows);
+    inline _PromptLogin() {
+        cache_get_row_count(rows);
 
-    if (!rows) {
-        Player_Kick(playerid);
-        return 0;
-    }
+        if (!rows) {
+            Player_Kick(playerid);
+            return 0;
+        }
 
-    cache_get_value_name(0, "password", playerHash, sizeof(playerHash));
-    cache_get_value_name(0, "date_reg", playerDate, sizeof(playerDate));
-    cache_get_value_name(0, "time_reg", playerTime, sizeof(playerTime));
-    cache_get_value_name(0, "ip", playerIP, sizeof(playerIP));
+        cache_get_value_name(0, "password", playerHash, sizeof(playerHash));
+        cache_get_value_name(0, "date_reg", playerDate, sizeof(playerDate));
+        cache_get_value_name(0, "time_reg", playerTime, sizeof(playerTime));
+        cache_get_value_name(0, "ip", playerIP, sizeof(playerIP));
 
-    Player_SetAccountHash(playerid, playerHash);
-    Player_SetAccountDate(playerid, playerDate);
-    Player_SetAccountTime(playerid, playerTime);
-    Player_SetAccountIP(playerid, playerIP);
+        Player_SetAccountDate(playerid, playerDate);
+        Player_SetAccountTime(playerid, playerTime);
+        Player_SetAccountIP(playerid, playerIP);
 
-    static 
-        const caption[] = 
-        "\
+        inline const _response(pid, dialogid, response, listitem, string:inputtext[])
+        {
+            #pragma unused pid, dialogid, listitem
+            if (response) {
+                bcrypt_verify(playerid, "OnPasswordVerify", inputtext, playerHash);
+            }
+            else {
+                Kick(playerid);
+            }
+        }
+
+        static const caption[] = "\
             ยินดีต้อนรับเข้าสู่ "SERVER_NAME"\
             กรุณาใส่รหัสผ่านเพื่อล็อคอิน\
         ";
 
-    Dialog_ShowCallback(playerid,
-        using public Account_Login<iiiis>, 
-        DIALOG_STYLE_PASSWORD, 
-        SERVER_NAME, 
-        caption, 
-        "ล็อคอิน",
-        "ออกจากเกม"
-    );
-    return 1;
-}
+        Dialog_ShowCallback(playerid, 
+            using inline _response, 
+            DIALOG_STYLE_PASSWORD, 
+            SERVER_NAME, 
+            caption, 
+            "ล็อคอิน",
+            "ออกจากเกม"
+        ); 
+    }
 
-forward Account_Login(playerid, dialogid, response, listitem, string:inputtext[]);
-public Account_Login(playerid, dialogid, response, listitem, string:inputtext[]) {
-    if (response) {
-        bcrypt_verify(playerid, "OnPasswordVerify", inputtext, Player_GetAccountHash(playerid));
-    }
-    else {
-        Kick(playerid);
-    }
+    static const query[] = "\
+        SELECT \
+            username, \
+            password, \
+            date_reg, \
+            time_reg, \
+            ip \
+        FROM \
+            players \
+        WHERE \
+            username = '%e'"
+    ;
+    
+    MySQL_TQueryInline(MySQL_GetHandle(), using inline _PromptLogin, query, Player_GetName(playerid));
     return 1;
 }
 
@@ -85,7 +85,6 @@ public OnPasswordVerify(playerid, bool:success) {
     {
         PasswordAttempts[playerid] = 0;
         CallLocalFunction("OnPlayerLogin", "d", playerid);
-        Player_ResetAccountHash(playerid);
     }
     else
     {

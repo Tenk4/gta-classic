@@ -6,7 +6,7 @@
 
 
 /*
-	Inspiration by https://github.com/PatrickGTR/gta-open
+	Inspired by https://github.com/PatrickGTR/gta-open without mysql-prepare & inline
 */
 
 #include <a_samp>
@@ -21,6 +21,7 @@
 #include <cec>
 
 // YSI
+#include <YSI_Extra\y_inline_mysql>
 #include <YSI_Coding\y_timers>
 #include <YSI_Data\y_iterate>
 #include <YSI_Visual\y_dialog>
@@ -29,6 +30,7 @@
 #include <init>
 
 #include <utils>
+#include <anti-cheat>
 #include <account>
 #include <player>
 
@@ -42,5 +44,35 @@ public OnGameModeInit()
 
 public OnGameModeExit()
 {
+	return 1;
+}
+
+CMD:te1(playerid, params) {
+	GivePlayerMoney(playerid, 500);
+	return 1;
+}
+
+CMD:te2(playerid, params) {
+	GivePlayerMoney(playerid, -250);
+	return 1;
+}
+
+CMD:te3(playerid, params) {
+	SetPlayerHealth(playerid, 50);
+	return 1;
+}
+
+CMD:te4(playerid, params) {
+	SetPlayerHealth(playerid, 100);
+	return 1;
+}
+
+CMD:te5(playerid, params) {
+	SetPlayerArmour(playerid, 50);
+	return 1;
+}
+
+CMD:te6(playerid, params) {
+	SetPlayerArmour(playerid, 100);
 	return 1;
 }
