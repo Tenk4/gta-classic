@@ -6,7 +6,8 @@
 
 
 /*
-	Inspired by https://github.com/PatrickGTR/gta-open without mysql-prepare & inline
+	Full source code from https://github.com/PatrickGTR/gta-open without mysql-prepare
+	Big thanks PatrickGTR
 */
 
 #include <a_samp>
@@ -21,10 +22,12 @@
 #include <cec>
 
 // YSI
-#include <YSI_Extra\y_inline_mysql>
+#include <YSI_Core\y_utils>
 #include <YSI_Coding\y_timers>
 #include <YSI_Data\y_iterate>
 #include <YSI_Visual\y_dialog>
+
+#include <YSI_Extra\y_inline_mysql>
 
 // Gamemodes Scripts
 #include <init>
@@ -48,12 +51,12 @@ public OnGameModeExit()
 }
 
 CMD:te1(playerid, params) {
-	GivePlayerMoney(playerid, 500);
+	VIP_GivePlayer(playerid, 2, 0, 1);
 	return 1;
 }
 
 CMD:te2(playerid, params) {
-	GivePlayerMoney(playerid, -250);
+	VIP_RemovePlayer(playerid);
 	return 1;
 }
 

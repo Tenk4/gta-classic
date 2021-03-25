@@ -5,6 +5,7 @@ forward OnPlayerRegister(playerid);
 #include <account_ban>
 #include <account_create>
 #include <account_login>
+#include <account_vip>
 
 #include <YSI_Coding\y_hooks>
 

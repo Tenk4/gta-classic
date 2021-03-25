@@ -56,6 +56,11 @@ Player_HitpointLoad(playerid) {
             cache_get_value_name_float(0, "armour", armour);
             cache_get_value_name_float(0, "health", health);
 
+            if(health <= 0)
+            {
+                health = 100.0;
+            }
+
             SetPlayerArmour(playerid, armour);
             SetPlayerHealth(playerid, health);
         }
