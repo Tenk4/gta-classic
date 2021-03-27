@@ -10,7 +10,7 @@ hook OnPlayerLogin(playerid)
     {
         new 
             expire, 
-            expiry_date[35],
+            expiry[20],
             rows
         ;
 
@@ -18,22 +18,23 @@ hook OnPlayerLogin(playerid)
 
         if(rows) {
             cache_get_value_name_int(0, "vip_level", Player_VIPLevel[playerid]);
-            cache_get_value_name(0, "expiry", expiry_date, sizeof(expiry_date));
+            cache_get_value_name(0, "expiry", expiry, sizeof(expiry));
             cache_get_value_name_int(0, "expire", expire);
 
             if (expire <= 0) {
                 VIP_RemovePlayer(playerid);
-                va_SendClientMessage(playerid, COLOR_RED, "VIP ของคุณหมดอายุแล้ว %s!", expiry_date);
+                va_SendClientMessage(playerid, COLOR_RED, "VIP ของคุณหมดอายุแล้ว %s!", expiry);
                 Player_VIPLevel[playerid] = 0;
                 return;
             }
-            va_SendClientMessage(playerid, COLOR_RED, "คุณคือ VIP ระดับ %d * จะหมดอายุในอีก {FFFFFF}%s", VIP_GetPlayerLevel(playerid), expiry_date);
+            va_SendClientMessage(playerid, COLOR_BLUE, "คุณคือ VIP ระดับ %d", VIP_GetPlayerLevel(playerid));
+            va_SendClientMessage(playerid, COLOR_RED, "จะหมดอายุใน %s", expiry);
         }
     }
     static const query[] = "\
         SELECT \
             vip_level, \
-            DATE_FORMAT(vip_expire_date, '"SQL_DATETIME_FORMAT"') as expiry, \
+            DATE_FORMAT(vip_expire_date, '%%d-%%m-%%Y %%T') as expiry, \
             TIMESTAMPDIFF(SECOND, CURRENT_TIMESTAMP(), vip_expire_date) as expire \
         FROM \
             vips \

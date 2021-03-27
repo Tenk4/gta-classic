@@ -9,7 +9,7 @@
 #define MAX_BAN_REASON          32
 #define BCRYPT_COST             12
 
-#define SQL_DATETIME_FORMAT     "%%d, %%M, %%Y at %%r"
+#define SQL_DATETIME_FORMAT     "%%d/%%m/%%Y (%%T)"
 #define SQL_DATE_FORMAT         "%d %M %Y"
 
 #define PRESSED(%0) \

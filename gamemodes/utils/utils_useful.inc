@@ -24,11 +24,3 @@ Time_Get() {
 
     return time;
 }
-
-ClearPlayerChat(playerid, lines) {
-    for(new i = 0; i <= lines; i++)
-    {
-        SendClientMessage(playerid, COLOR_WHITE, "");
-    }
-    return 1;
-}

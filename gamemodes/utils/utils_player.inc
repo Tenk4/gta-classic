@@ -24,3 +24,11 @@ public Player_Kicked(playerid) {
     Kick(playerid);
     return 1;
 }
+
+ClearPlayerChat(playerid, lines) {
+    for(new i = 0; i <= lines; i++)
+    {
+        SendClientMessage(playerid, COLOR_WHITE, "");
+    }
+    return 1;
+}

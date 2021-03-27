@@ -22,7 +22,6 @@
 #include <cec>
 
 // YSI
-#include <YSI_Core\y_utils>
 #include <YSI_Coding\y_timers>
 #include <YSI_Data\y_iterate>
 #include <YSI_Visual\y_dialog>
