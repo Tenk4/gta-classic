@@ -4,8 +4,7 @@ static
     PlayerAdmin[MAX_PLAYERS],
     PlayerKills[MAX_PLAYERS],
     PlayerDeaths[MAX_PLAYERS],
-    PlayerWantedLevel[MAX_PLAYERS],
-    PlayerSkin[MAX_PLAYERS];
+    PlayerWantedLevel[MAX_PLAYERS];
 
 Account_LoadStats(playerid) {
     inline _LoadStats() {
@@ -15,7 +14,6 @@ Account_LoadStats(playerid) {
             deaths,
             wantedlevel,
             money,
-            skin,
             rows
         ;
 
@@ -27,7 +25,6 @@ Account_LoadStats(playerid) {
             cache_get_value_name_int(0, "deaths", deaths);
             cache_get_value_name_int(0, "wanted_level", wantedlevel);
             cache_get_value_name_int(0, "money", money);
-            cache_get_value_name_int(0, "skin", skin);
 
             Player_GiveAdmin(playerid, adminlevel);
 
@@ -44,8 +41,7 @@ Account_LoadStats(playerid) {
             kills, \
             deaths, \
             wanted_level, \
-            money, \
-            skin \
+            money \
         FROM \
             player_stats \
         WHERE \
@@ -178,56 +174,4 @@ stock Player_GiveDeath(playerid, deaths, bool:save = false) {
 
 stock Player_GetDeaths(playerid) {
     return PlayerDeaths[playerid];
-}
-
-hook function SetPlayerHealth(playerid, Float:health) {
-    va_SendClientMessage(playerid, -1, "hp change %.0f", health);
-    
-    new
-        string[80]
-    ;
-
-    static const query[] = "\
-        UPDATE \
-            player_stats \
-        SET \
-            health = %.0f \
-        WHERE \
-            u_id = %d \
-    ";
-
-    mysql_format(MySQL_GetHandle(), string, sizeof string, 
-        query,
-        health,
-        Player_GetAccountID(playerid)
-    );
-    mysql_tquery(MySQL_GetHandle(), string);
-
-    return continue(playerid, health);
-}
-
-hook function SetPlayerArmour(playerid, Float:armour) {
-    va_SendClientMessage(playerid, -1, "armour change %.0f", armour);
-    
-    new
-        string[80]
-    ;
-
-    static const query[] = "\
-        UPDATE \
-            player_stats \
-        SET \
-            armour = %.0f \
-        WHERE \
-            u_id = %d \
-    ";
-
-    mysql_format(MySQL_GetHandle(), string, sizeof string, 
-        query,
-        armour,
-        Player_GetAccountID(playerid)
-    );
-    mysql_tquery(MySQL_GetHandle(), string);
-
-    return continue(playerid, armour);
 }

@@ -1,9 +1,9 @@
 #include <YSI_Coding\y_hooks>
 
 stock Account_PromptRegister(playerid) {
-    inline const _response(pid, dialogid, response, listitem, string:inputtext[])
+    inline const _response(response, listitem, string:inputtext[])
     {
-        #pragma unused pid, dialogid, listitem
+        #pragma unused listitem
         if (response) {
             if (!(4 <= strlen(inputtext) <= 20)) {
                 SendClientMessage(playerid, COLOR_RED, "รหัสผ่านต้องไม่ต่ำกว่า 4 และไม่มากกว่า 20 ตัวอักษร");

@@ -23,10 +23,6 @@ timer void:ForceSpawnPlayer[50](playerid) {
 }
 
 hook OnPlayerSpawn(playerid) {
-    if(PlayerFirstSpawn[playerid]) {
-        CallLocalFunction("OnPlayerFirstSpawn", "i", playerid);
-        PlayerFirstSpawn[playerid] = false;
-    }
     SetPlayerPos(playerid, 810.63520, -1340.0682, 13.5386);
     SetPlayerFacingAngle(playerid, 37.33070);
     SetCameraBehindPlayer(playerid);
@@ -39,47 +35,5 @@ hook OnPlayerSpawn(playerid) {
         Player_GetAccountTime(playerid), 
         Player_GetAccountIP(playerid)
     );
-    return 1;
-}
-
-Player_HitpointLoad(playerid) {
-    inline _LoadHitpoint() {
-        new
-            Float:armour,
-            Float:health,
-            rows
-        ;
-
-        cache_get_row_count(rows);
-
-        if(rows) {
-            cache_get_value_name_float(0, "armour", armour);
-            cache_get_value_name_float(0, "health", health);
-
-            if(health <= 0)
-            {
-                health = 100.0;
-            }
-
-            SetPlayerArmour(playerid, armour);
-            SetPlayerHealth(playerid, health);
-        }
-    }
-
-    static const query[] = "\
-        SELECT \
-            armour, \
-            health \
-        FROM \
-            player_stats \
-        WHERE \
-            u_id = %d \
-    ";
-
-    MySQL_TQueryInline(MySQL_GetHandle(), using inline _LoadHitpoint, query, Player_GetAccountID(playerid));
-}
-
-public OnPlayerFirstSpawn(playerid) {
-    Player_HitpointLoad(playerid);
     return 1;
 }
