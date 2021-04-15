@@ -1,6 +1,7 @@
 #include <YSI_Coding\y_hooks>
 
 Player_HitpointLoad(playerid) {
+    print("Player_HitpointLoad");
     inline _LoadHitpoint() {
         new
             Float:armour,
@@ -62,6 +63,7 @@ Player_HitpointSave(playerid) {
     mysql_format(MySQL_GetHandle(), string, sizeof string, 
         query,
         health,
+        armour,
         Player_GetAccountID(playerid)
     );
     mysql_tquery(MySQL_GetHandle(), string);

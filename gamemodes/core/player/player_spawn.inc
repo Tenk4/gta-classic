@@ -23,6 +23,10 @@ timer void:ForceSpawnPlayer[50](playerid) {
 }
 
 hook OnPlayerSpawn(playerid) {
+    if(PlayerFirstSpawn[playerid]) {
+        CallLocalFunction("OnPlayerFirstSpawn", "i", playerid);
+        PlayerFirstSpawn[playerid] = false;
+    }
     SetPlayerPos(playerid, 810.63520, -1340.0682, 13.5386);
     SetPlayerFacingAngle(playerid, 37.33070);
     SetCameraBehindPlayer(playerid);

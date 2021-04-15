@@ -24,7 +24,7 @@ Account_PromptLogin(playerid) {
 
         if (!rows) {
             Player_Kick(playerid);
-            return 0;
+            return;
         }
 
         cache_get_value_name(0, "password", playerHash, sizeof(playerHash));
@@ -40,7 +40,24 @@ Account_PromptLogin(playerid) {
         {
             #pragma unused pid, dialogid, listitem
             if (response) {
-                bcrypt_verify(playerid, "OnPasswordVerify", inputtext, playerHash);
+                inline const OnPasswordVerify(bool: success) {
+                    if(!success) {
+                        PasswordAttempts[playerid] ++;
+                        va_SendClientMessage(playerid, COLOR_RED, "รหัสผ่านไม่ถูกต้องครบ %d/3 ระบบจึงเตะคุณออกจากเซิร์ฟเวอร์", PasswordAttempts[playerid]);
+                        if(PasswordAttempts[playerid] >= 3) {
+                            SendClientMessage(playerid, COLOR_RED, "ช่วยเหลือ: /q ในการออกจากหน้าต่างเกม");
+                            Player_Kick(playerid);
+                            return;
+                        }
+
+                        Account_PromptLogin(playerid);
+                        return;
+                    }
+                    PasswordAttempts[playerid] = 0;
+                    CallLocalFunction("OnPlayerLogin", "i", playerid); // Used in other modules to load other data.
+                }
+                BCrypt_CheckInline(inputtext, playerHash, using inline OnPasswordVerify);
+            //    bcrypt_verify(playerid, "OnPasswordVerify", inputtext, playerHash);
             }
             else {
                 Kick(playerid);
@@ -76,32 +93,6 @@ Account_PromptLogin(playerid) {
     ;
     
     MySQL_TQueryInline(MySQL_GetHandle(), using inline _PromptLogin, query, Player_GetName(playerid));
-    return 1;
-}
-
-forward OnPasswordVerify(playerid, bool:success);
-public OnPasswordVerify(playerid, bool:success) {
-    if (success)
-    {
-        PasswordAttempts[playerid] = 0;
-        CallLocalFunction("OnPlayerLogin", "d", playerid);
-    }
-    else
-    {
-        PasswordAttempts[playerid]++;
-        if (PasswordAttempts[playerid] >= 3)
-        {
-            SendClientMessage(playerid, COLOR_RED, "รหัสผ่านไม่ถูกต้องครบ 3/3 ระบบจึงเตะคุณออกจากเซิร์ฟเวอร์");
-            SendClientMessage(playerid, COLOR_RED, "ช่วยเหลือ: /q ในการออกจากหน้าต่างเกม");
-            Player_Kick(playerid);
-        }
-        else
-        {
-            va_SendClientMessage(playerid, COLOR_RED, "รหัสผ่านไม่ถูกต้อง %d/3", PasswordAttempts[playerid]);
-            SendClientMessage(playerid, COLOR_RED, "หากคุณใส่รหัสผ่านไม่ถูกต้องครบ 3 ครั้ง ระบบจะทำการเตะคุณออกจากเซิร์ฟเวอร์");
-            Account_PromptLogin(playerid);
-        }
-    }
 }
 
 hook OnPlayerLogin(playerid) {

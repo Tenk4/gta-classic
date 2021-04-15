@@ -27,6 +27,7 @@
 #include <YSI_Visual\y_dialog>
 
 #include <YSI_Extra\y_inline_mysql>
+#include <YSI_Extra\y_inline_bcrypt>
 
 // Gamemodes Scripts
 #include <init>
